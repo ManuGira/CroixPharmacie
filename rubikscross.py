@@ -135,7 +135,7 @@ def move_down(board, shift=1):
 
 def main():
     pygame.init()
-    screen = pharmacontroller.PharmaScreen(color_scale=True)
+    screen = pharmacontroller.PharmaScreen(color_scale=False)
 
     controls = {
         pygame.K_LEFT: Action.LEFT,
@@ -173,17 +173,26 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 action = controls[event.key]
-                move_func = None
+                move_func_list = []
                 if action == Action.UP:
-                    move_func = move_up
+                    move_func_list.append(move_up)
                 elif action == Action.DOWN:
-                    move_func = move_down
+                    move_func_list.append(move_down)
                 elif action == Action.LEFT:
-                    move_func = move_left
+                    move_func_list.append(move_left)
                 elif action == Action.RIGHT:
-                    move_func = move_right
+                    move_func_list.append(move_right)
+                elif action == Action.SCRAMBLE:
+                    if np.sum((board - init_2x2x5).flatten()) == 0:
+                        # Sramble
+                        for rn in np.random.randint(0, 4, 10):
+                            mvfunc = [move_up, move_down, move_left, move_right][rn]
+                            move_func_list.append(mvfunc)
+                    else:
+                        # Solve
+                        board = init_2x2x5.copy()
 
-                if move_func is not None:
+                for move_func in move_func_list:
                     new_frames = generate_animation(board, move_func, animation_max_length // 2)
                     target_total_length = (len(animation) + animation_max_length) // 2
                     animation += new_frames
