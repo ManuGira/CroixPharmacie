@@ -71,6 +71,16 @@ def generate_image(board):
     return res
 
 
+def generate_animation(board, move_func, frame_count):
+    res = []
+    image0 = generate_image(board)
+    for i in range(frame_count):
+        shift = (TILE_SIZE * (i + 1)) // frame_count
+        frame = move_func(image0, shift)
+        res.append(frame)
+    return res
+
+
 class Action(enum.Enum):
     LEFT = enum.auto()
     RIGHT = enum.auto()
@@ -79,7 +89,7 @@ class Action(enum.Enum):
     SCRAMBLE = enum.auto()
 
 
-def move_right(board):
+def move_right(board, shift=1):
     assert len(board.shape) == 2
     h, w = board.shape
     assert h % 3 == 0
@@ -87,22 +97,22 @@ def move_right(board):
 
     n = h // 3
     board = board.copy()
-    board[:n, n:2 * n] = np.roll(board[:n, n:2 * n], shift=1, axis=1)
-    board[n:2 * n, :] = np.roll(board[n:2 * n, :], shift=1, axis=1)
-    board[2 * n:, n:2 * n] = np.roll(board[2 * n:, n:2 * n], shift=1, axis=1)
+    board[:n, n:2 * n] = np.roll(board[:n, n:2 * n], shift=shift, axis=1)
+    board[n:2 * n, :] = np.roll(board[n:2 * n, :], shift=shift, axis=1)
+    board[2 * n:, n:2 * n] = np.roll(board[2 * n:, n:2 * n], shift=shift, axis=1)
     return board
 
 
-def move_left(board):
-    return move_right(board[:, ::-1])[:, ::-1]
+def move_left(board, shift=1):
+    return move_right(board[:, ::-1], shift)[:, ::-1]
 
 
-def move_up(board):
-    return move_left(board.T).T
+def move_up(board, shift=1):
+    return move_left(board.T, shift).T
 
 
-def move_down(board):
-    return move_right(board.T).T
+def move_down(board, shift=1):
+    return move_right(board.T, shift).T
 
 
 def main():
@@ -135,6 +145,8 @@ def main():
     lut = np.arange(256, dtype=float) * 255 / 7
     lut = np.clip(lut, 0, 255).astype(np.uint8)
 
+    animation = []
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -142,23 +154,25 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 action = controls[event.key]
+                move_func = None
                 if action == Action.UP:
-                    print("UP")
-                    board = move_up(board)
+                    move_func = move_up
                 elif action == Action.DOWN:
-                    print("DOWN")
-                    board = move_down(board)
+                    move_func = move_down
                 elif action == Action.LEFT:
-                    print("LEFT")
-                    board = move_left(board)
+                    move_func = move_left
                 elif action == Action.RIGHT:
-                    print("RIGHT")
-                    board = move_right(board)
+                    move_func = move_right
 
-        # img = cv2.resize(board, (SCREEN_SIZE, SCREEN_SIZE), interpolation=cv2.INTER_NEAREST).astype(np.uint8)
-        # img = cv2.LUT(img, lut)
+                if move_func is not None:
+                    new_frames = generate_animation(board, move_func, 8)
+                    animation += new_frames
+                    board = move_func(board)
 
-        img = generate_image(board)
+        if len(animation) == 0:
+            img = generate_image(board)
+        else:
+            img = animation.pop(0)
         screen.set_image_u8(img)
 
 
