@@ -71,6 +71,14 @@ def generate_image(board):
     return res
 
 
+def drop_frames(animation, target_length):
+    current_length = len(animation)
+    drop_count = current_length - target_length
+    for i in range(drop_count)[::-1]:
+        ind = (i * current_length) // drop_count
+        animation.pop(ind)
+
+
 def generate_animation(board, move_func, frame_count):
     res = []
     image0 = generate_image(board)
@@ -145,6 +153,7 @@ def main():
     lut = np.arange(256, dtype=float) * 255 / 7
     lut = np.clip(lut, 0, 255).astype(np.uint8)
 
+    animation_max_length = 16
     animation = []
 
     while True:
@@ -165,8 +174,10 @@ def main():
                     move_func = move_right
 
                 if move_func is not None:
-                    new_frames = generate_animation(board, move_func, 8)
+                    new_frames = generate_animation(board, move_func, animation_max_length // 2)
+                    target_total_length = (len(animation) + animation_max_length) // 2
                     animation += new_frames
+                    drop_frames(animation, target_total_length)
                     board = move_func(board)
 
         if len(animation) == 0:
