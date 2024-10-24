@@ -1,13 +1,74 @@
 import enum
 import sys
-import time
 
 import numpy as np
 import pygame
-import cv2
+
 import pharmacontroller
 
 SCREEN_SIZE = pharmacontroller.SCREEN_SIZE
+
+TILE_SIZE = 8
+TILES = [
+    np.zeros((TILE_SIZE, TILE_SIZE), dtype=np.uint8),
+    np.array([
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+    ], dtype=np.uint8) * 255,
+    np.array([
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+    ], dtype=np.uint8) * 255,
+    np.array([
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+    ], dtype=np.uint8) * 255,
+    np.array([
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+        [1, 0, 1, 1, 1, 1, 0, 1],
+        [1, 0, 1, 1, 1, 1, 0, 1],
+        [1, 0, 0, 1, 1, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+    ], dtype=np.uint8) * 255,
+    np.ones((TILE_SIZE, TILE_SIZE), dtype=np.uint8) * 255,
+]
+
+
+def insert_tile(image, tile, coord_ij):
+    th, tw = tile.shape
+    i, j = coord_ij
+    image[i * th:(i + 1) * th, j * tw:(j + 1) * tw] = tile
+
+
+def generate_image(board):
+    h, w = board.shape
+    res = np.zeros((SCREEN_SIZE, SCREEN_SIZE), dtype=np.uint8)
+    for i in range(h):
+        for j in range(w):
+            ind = int(board[i, j])
+            insert_tile(res, TILES[ind], (i, j))
+    return res
 
 
 class Action(enum.Enum):
@@ -94,8 +155,10 @@ def main():
                     print("RIGHT")
                     board = move_right(board)
 
-        img = cv2.resize(board, (SCREEN_SIZE, SCREEN_SIZE), interpolation=cv2.INTER_NEAREST).astype(np.uint8)
-        img = cv2.LUT(img, lut)
+        # img = cv2.resize(board, (SCREEN_SIZE, SCREEN_SIZE), interpolation=cv2.INTER_NEAREST).astype(np.uint8)
+        # img = cv2.LUT(img, lut)
+
+        img = generate_image(board)
         screen.set_image_u8(img)
 
 
