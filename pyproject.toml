@@ -12,6 +12,7 @@ dependencies = [
 	"matplotlib>=3.7",
 	"pydub>=0.25.1",
 	"cydoomgeneric @ git+https://github.com/wojciech-graj/cydoomgeneric",
+	"rubikscross",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
@@ -42,3 +43,6 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/croix_pharmacie"]
+
+[tool.uv.sources]
+rubikscross = { git = "https://github.com/ManuGira/rubikscross", rev = "eeb08a30990455e99938cd5948407c06b52d43db" }
