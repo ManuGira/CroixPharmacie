@@ -13,7 +13,6 @@
  GNU General Public License for more details.
 """
 
-
 import sys
 
 import cv2
@@ -21,7 +20,7 @@ import cydoomgeneric as cdg
 import pygame
 
 from croix_pharmacie.asset_helper import get_asset_path
-from  croix_pharmacie.pharmacontroller import PharmaScreen
+from croix_pharmacie.pharmacontroller import PharmaScreen
 
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 400
@@ -41,24 +40,29 @@ keymap = {
     pygame.K_ESCAPE: cdg.Keys.ESCAPE,
 }
 
+
 def draw_frame(screen, pixels, debug_figax) -> None:
     if DEBUGGER:
         fig, ax = debug_figax
         ax.clear()
-        ax.imshow(pixels[:,:,[2,1,0]])
+        ax.imshow(pixels[:, :, [2, 1, 0]])
         fig.canvas.draw()
         fig.canvas.flush_events()
 
     # Resize pixels to a 48x77 array with interpolation
-    pixels = cv2.resize(pixels, (77, 48), interpolation=cv2.INTER_CUBIC)
+    pixels = cv2.resize(pixels, (77, 48), interpolation=cv2.INTER_AREA)
 
-    # Flatten rgba to grayscale and normalize to [0.0, 1.0]
-    pixels = pixels.mean(axis=2) / 255.0
+    # Flatten rgba to grayscale
+    pixels = cv2.cvtColor(pixels, cv2.COLOR_RGBA2GRAY)
 
     # Crop to 48x48 centered
     pixels = pixels[:, 14:62]
 
-    screen.set_image(pixels[:48][:48])
+    # auto contrast with histogram equalization
+    pixels = cv2.equalizeHist(pixels)
+
+    screen.set_image_u8(pixels[:48][:48])
+
 
 def get_key():
     for event in pygame.event.get():
@@ -68,12 +72,13 @@ def get_key():
         if event.type == pygame.KEYDOWN:
             if event.key in keymap:
                 return 1, keymap[event.key]
-        
+
         if event.type == pygame.KEYUP:
             if event.key in keymap:
                 return 0, keymap[event.key]
-            
+
     return None
+
 
 def main():
     pygame.init()
@@ -89,9 +94,9 @@ def main():
         debug_figax = None
 
     cdg.init(SCREEN_WIDTH,
-        SCREEN_HEIGHT,
-        lambda pixels: draw_frame(screen, pixels, debug_figax),
-        get_key)
+             SCREEN_HEIGHT,
+             lambda pixels: draw_frame(screen, pixels, debug_figax),
+             get_key)
     cdg.main(argv=["cydoomgeneric", "-iwad", str(get_asset_path("doom1.wad"))])
 
 
