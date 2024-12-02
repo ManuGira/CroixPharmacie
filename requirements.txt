@@ -12,7 +12,7 @@ imageio-ffmpeg==0.5.1
 kiwisolver==1.4.7
 matplotlib==3.9.3
 moviepy==2.1.1
-numpy==2.1.3
+numpy==1.26.4
 opencv-python==4.10.0.84
 packaging==24.2
 pillow==10.4.0
@@ -22,6 +22,7 @@ pygame==2.6.1
 pyparsing==3.2.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
+rubikscross @ git+https://github.com/ManuGira/rubikscross@eeb08a30990455e99938cd5948407c06b52d43db
 setuptools==75.6.0
 six==1.16.0
 tqdm==4.67.1
