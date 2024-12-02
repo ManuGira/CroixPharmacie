@@ -1,5 +1,7 @@
 # CroixPharmacie
 
+Ce repo est un fork. Pour plus d'info, voir le repo originel https://github.com/MathisHammel/CroixPharmacie
+
 Ce projet permet de contrôler à distance l'affichage d'une croix de pharmacie. Si vous n'avez pas la chance de posséder une croix de pharmacie chez vous, le code vous permet également de simuler l'affichage localement.
 
 ![Chute de sable sur une croix de pharmacie](Sandfall.gif)
@@ -33,18 +35,22 @@ Pour des raisons matérielles, la croix gère deux modes de couleur :
 - Rotozoom - [rotozoom.py](src/croix_pharmacie/mains/rotozoom.py)
 
 ## Installation
-Pour juste l'installer : `pip install git+https://github.com/MathisHammel/CroixPharmacie`
-Si vous voulez faire des modifications `pip install --editable git+https://github.com/MathisHammel/CroixPharmacie`
 
-Pour ajouter des features vous pouvez aussi installer [rye](https://rye.astral.sh/) puis faire:
-* `rye sync`
-* `rye run pong` (si vous voulez lancer le pong par example)
+Vous pouvez utiliser le requirements.txt avec pip, ou mieux encore utiliser [uv](https://docs.astral.sh/uv/):
+```uv sync```
+Cette simple commande installe la bonne version de python, puis crée un environment virtuel avec toutes les dépendences nécessaire au projet.
 
-## Une idée à ajouter ?
+Pour lancer un script, par exemple pong.py:
+```bash
+uv run src/croix_pharmacie/scripts/pong.py
+```
 
-Les pull requests sont les bienvenues sur ce dépôt ! Et si vous envoyez votre code d'ici la fin du mois (juin 2024), vous aurez potentiellement la chance de le voir être exécuté sur une vraie croix de pharmacie 😉
+ou plus simplment
+```bash
+uv run pong
+```
+la commande ci-dessus fonctionne parce que le script pong.py a été déclaré en tant que `project.scripts` dans le `pyproject.toml`
 
-Pour soumettre une idée si vous n'êtes pas en mesure de coder, n'hésitez pas à créer [une issue GitHub](https://github.com/MathisHammel/CroixPharmacie/issues), ou m'envoyer des propositions en [DM sur Twitter](https://twitter.com/MathisHammel).
-
-## Comment jouer à Doom ?
+## Contrôles
+### Doom
 Utilisez les flèches pour vous déplacer, Ctrl gauche pour tirer, et la barre espace pour ouvrir les portes.
