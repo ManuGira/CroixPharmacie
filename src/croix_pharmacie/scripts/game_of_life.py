@@ -6,7 +6,7 @@ from typing import List
 
 import pygame
 
-from pharmacontroller import SCREEN_SIZE, PharmaScreen
+from croix_pharmacie.pharmacontroller import SCREEN_SIZE, PharmaScreen
 
 Grid = type(List[List[int]])
 
@@ -99,7 +99,7 @@ def next_generation(grid: Grid) -> Grid:
     return new_grid
 
 
-if __name__ == "__main__":
+def main():
     pygame.init()
     screen = PharmaScreen(color_scale=False)
 
@@ -120,3 +120,6 @@ if __name__ == "__main__":
 
         # Leave time to contemplate life
         time.sleep(0.1)
+
+if __name__ == "__main__":
+    main()
