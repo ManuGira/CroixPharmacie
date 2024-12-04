@@ -1,8 +1,8 @@
 import sys
 import pygame
 import threading
-from pharmacontroller import SCREEN_SIZE, PharmaScreen
-from textwriter import String
+from croix_pharmacie.pharmacontroller import SCREEN_SIZE, PharmaScreen
+from croix_pharmacie.textwriter import String
 
 from dataclasses import dataclass, field
 from typing import List, Tuple
@@ -169,5 +169,8 @@ def game_loop():
     pygame.quit()
     sys.exit()
 
-if __name__ == "__main__":
+def main():
     game_loop()
+
+if __name__ == "__main__":
+    main()
