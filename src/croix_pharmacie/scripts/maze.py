@@ -12,9 +12,9 @@ TRAIL_TIME = 5  # Time in seconds before trail disappears
 
 # Directions (example level input)
 level_directions = [
-   "right", "right", "right", "right", "right", "right", "up", "right", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "left", "up", "up", "right", "right",
-   "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "right", "right", "right", "up", "up", "left", "up", "left", "left", "left", "left", "left", "left", "left",
-   "up", "up", "up", "up", "up", "up", "up", "up", "left", "left", "left", "up", "up", "up", "up", "up", "up", "up", "up"
+    "right", "right", "right", "right", "right", "right", "up", "right", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "left", "up", "up", "right",
+    "right", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "right", "right", "right", "up", "up", "left", "up", "left", "left", "left", "left", "left",
+    "left", "left", "up", "up", "up", "up", "up", "up", "up", "up", "left", "left", "left", "up", "up", "up", "up", "up", "up", "up", "up"
 ]
 # To create level, copy the array above with the same name and replace the directions with the correct ones
 
@@ -31,6 +31,7 @@ DIRECTIONS = {
     "left": (-1, 0),
     "right": (1, 0),
 }
+
 
 @dataclass
 class Player:
@@ -64,6 +65,7 @@ class Player:
         self.trail = [(self.x, self.y)]  # Reset trail to the initial position
         self.trail_directions = []
 
+
 def draw_trail(screen, player, show_trail=True):
     # Fill screen with blank (off pixels)
     screen.pixel_buffer = [[EMPTY_COLOR for _ in range(SCREEN_SIZE)] for _ in range(SCREEN_SIZE)]
@@ -82,6 +84,7 @@ def draw_cell(screen, row, col, color):
     if screen.is_drawable(row, col):
         screen.pixel_buffer[row][col] = color
 
+
 def check_trail(player):
     image = [[0.0 for c in range(SCREEN_SIZE)] for r in range(SCREEN_SIZE)]
 
@@ -92,14 +95,16 @@ def check_trail(player):
     if player.trail_directions != level_directions[:current_length]:
         return loosing_string, True  # Return "You Lost" and set game_over as True
     elif player.trail_directions == level_directions:
-        return winning_string, True   # Return "Level Cleared" and set game_over as True
+        return winning_string, True  # Return "Level Cleared" and set game_over as True
     return None, False  # No game over yet
+
 
 # Function to hide trail after TRAIL_TIME and reset the player's position
 def hide_trail(player):
     player.reset()  # Reset the player's position and trail
     global game_started
     game_started = True
+
 
 def get_event(player):
     for event in pygame.event.get():
@@ -121,6 +126,7 @@ def get_event(player):
                     sys.exit()
     return None
 
+
 def display_message_until_escape(string_object, screen, player):
     """Display the string message until the player presses ESC to exit."""
     image = [[0.0 for c in range(SCREEN_SIZE)] for r in range(SCREEN_SIZE)]
@@ -131,15 +137,16 @@ def display_message_until_escape(string_object, screen, player):
         # Keep showing the message until ESC is pressed
         string_object.scroll(inverted=False)
         screen.set_image(image)
-        
+
         get_event(player)
 
         pygame.time.Clock().tick(30)
 
+
 def game_loop():
     # Define starting point at the very bottom middle of the cross
     start_x = SCREEN_SIZE // 2  # Middle of the screen horizontally
-    start_y = SCREEN_SIZE - 1   # Very bottom of the screen
+    start_y = SCREEN_SIZE - 1  # Very bottom of the screen
     player = Player(start_x, start_y)
 
     global game_started
@@ -159,7 +166,7 @@ def game_loop():
     while running:
         get_event(player)
         draw_trail(screen, player, show_trail=True)
-        
+
         if game_started and not game_over:
             string_object, game_over = check_trail(player)
             if game_over:
@@ -169,8 +176,10 @@ def game_loop():
     pygame.quit()
     sys.exit()
 
+
 def main():
     game_loop()
+
 
 if __name__ == "__main__":
     main()
