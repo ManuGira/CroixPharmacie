@@ -10,6 +10,10 @@ from typing import List, Tuple
 # Constants for the game
 TRAIL_TIME = 5  # Time in seconds before trail disappears
 
+game_started = False
+game_need_reset = False
+game_over = False
+
 # Directions (example level input)
 level_directions = [
     "right", "right", "right", "right", "right", "right", "up", "right", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "left", "up", "up", "right",
@@ -121,6 +125,9 @@ def get_event(player):
                     player.move("up")
                 case pygame.K_DOWN:
                     player.move("down")
+                case pygame.K_SPACE:
+                    global game_need_reset, game_over
+                    game_need_reset = game_over
                 case pygame.K_ESCAPE | pygame.QUIT:
                     pygame.quit()
                     sys.exit()
@@ -132,6 +139,8 @@ def display_message_until_escape(string_object, screen, player):
     image = [[0.0 for c in range(SCREEN_SIZE)] for r in range(SCREEN_SIZE)]
     string_object.image = image
 
+    global game_need_reset
+
     running = True
     while running:
         # Keep showing the message until ESC is pressed
@@ -142,6 +151,9 @@ def display_message_until_escape(string_object, screen, player):
 
         pygame.time.Clock().tick(30)
 
+        if game_need_reset:
+            return
+
 
 def game_loop():
     # Define starting point at the very bottom middle of the cross
@@ -149,9 +161,9 @@ def game_loop():
     start_y = SCREEN_SIZE - 1  # Very bottom of the screen
     player = Player(start_x, start_y)
 
-    global game_started
+    global game_started, game_need_reset, game_over
     game_started = False
-
+    game_need_reset = False
     game_over = False
 
     screen = PharmaScreen(True)
@@ -171,14 +183,14 @@ def game_loop():
             string_object, game_over = check_trail(player)
             if game_over:
                 display_message_until_escape(string_object, screen, player)
-
+                if game_need_reset:
+                    return
         pygame.time.Clock().tick(30)
-    pygame.quit()
-    sys.exit()
 
 
 def main():
-    game_loop()
+    while True:
+        game_loop()
 
 
 if __name__ == "__main__":
