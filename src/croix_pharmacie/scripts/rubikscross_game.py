@@ -1,25 +1,50 @@
+import enum
+import time
+
 import cv2
+import numpy as np
+import pygame
+import rubikscross
+from rubikscross.game_app import Action
 from rubikscross.graphic_painters import RollFuncMap
 from rubikscross.graphics import Graphics
 from rubikscross.mixer import SilentMixer
 from rubikscross.rubikscross import RubiksCross
 from rubikscross.tiles import TILES
-import rubikscross
-from rubikscross import controller_pro
+
 import croix_pharmacie.pharmacontroller
-import numpy.typing as npt
-import pygame
-from rubikscross.game_app import Action
-import numpy as np
 
 
 class GameApp_PharmaController:
+    class STATE(enum.Enum):
+        GAME = enum.auto()
+        ANIMATION = enum.auto()
+
     def __init__(self, board_size, rubikscross: RubiksCross):
         self.board_size = board_size
         self.rubikscross = rubikscross
 
+        self.state = self.STATE.GAME
+        self.anim_actions: list
+        self.anim_next_action_time: float
+        self.anim_index = 0
+
         pygame.init()
         self.screen = croix_pharmacie.pharmacontroller.PharmaScreen(color_scale=False)
+
+
+    def generate_anim_actions(self):
+        scramble_action_ids = []
+        solve_action_ids = []
+        ind = np.random.randint(0, 4, 1)[0]
+        for rn in np.random.randint(1, 4, 20):
+            ind = (ind + 2 + rn) % 4  # avoid to take the opposite of previous move. (e.g. We don't want LEFT if it was RIGHT)
+            scramble_action_ids = scramble_action_ids + [ind]
+            solve_action_ids = [(ind + 2) % 4] + solve_action_ids  # inverse scrambling
+        action_choices = [Action.LEFT, Action.UP, Action.RIGHT, Action.DOWN]
+        self.anim_actions = [action_choices[ind] for ind in scramble_action_ids + solve_action_ids]
+        self.anim_next_action_time = time.time() + 1
+
 
     def run(self):
         key_action_map = {
@@ -34,12 +59,6 @@ class GameApp_PharmaController:
             pygame.K_e: Action.ROT_RIGHT,
             pygame.K_q: Action.ROT_LEFT,
             pygame.K_SPACE: Action.SCRAMBLE,
-            pygame.K_1: Action.SAVE1,
-            pygame.K_2: Action.SAVE2,
-            pygame.K_3: Action.SAVE3,
-            pygame.K_F1: Action.LOAD1,
-            pygame.K_F2: Action.LOAD2,
-            pygame.K_F3: Action.LOAD3,
         }
 
         while True:
@@ -48,12 +67,38 @@ class GameApp_PharmaController:
                     pygame.quit()
                     sys.exit()
                 elif event.type in [pygame.KEYDOWN]:
-                    if event.key in key_action_map.keys():
+                    if event.key in key_action_map.keys() and self.state == self.STATE.GAME:
                         self.rubikscross.on_action(key_action_map[event.key])
+                    elif event.key in [pygame.K_RETURN]:
+                        self.rubikscross.reset()
+                        if self.state == self.STATE.ANIMATION:
+                            print("game mode")
+                            self.state = self.STATE.GAME
+                        else:
+                            print("animation mode")
+                            self.state = self.STATE.ANIMATION
+                            self.generate_anim_actions()
+
+            if self.state == self.STATE.ANIMATION:
+                if time.time() > self.anim_next_action_time:
+                    self.rubikscross.on_action(self.anim_actions[self.anim_index])
+                    self.anim_index += 1
+                    if self.anim_index < len(self.anim_actions)//2:
+                        dt = 0.01
+                    elif self.anim_index == len(self.anim_actions)//2:
+                        dt = 2
+                    elif self.anim_index < len(self.anim_actions):
+                        dt = np.random.gamma(shape=2, scale=0.3)
+                    else:
+                        dt = 3
+                        self.anim_index = 0
+                        self.generate_anim_actions()
+                    self.anim_next_action_time = time.time() + dt
 
             hint_frame = self.rubikscross.rcgraphics.get_hint_frame()
             image, alpha = self.rubikscross.rcgraphics.get_next_frame()
             self.screen.set_image(image[:, :, 0].astype(float))
+
 
 def recolorize_tiles(tiles_rgb):
     # recolorise les tuiles pour les rendre plus lisible sur la croix de pharmacie
